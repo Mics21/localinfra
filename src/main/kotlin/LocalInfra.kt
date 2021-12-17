@@ -7,16 +7,16 @@ import java.sql.DriverManager
 
 private const val SLEEP_TIME: Long = 2000
 
-internal fun waitOnLocalPostgres(database: String) {
-    while (!testConnection(database)) {
+internal fun waitOnLocalPostgres(database: String, user: String, password: String) {
+    while (!testConnection(database, user, password)) {
         println("Waiting on local Postgres")
         Thread.sleep(SLEEP_TIME)
     }
 }
 
 @Suppress("TooGenericExceptionCaught")
-internal fun testConnection(database: String): Boolean {
-    val url = "jdbc:postgresql://localhost:5432/$database?user=postgres&password=postgres"
+internal fun testConnection(database: String, user: String, password: String): Boolean {
+    val url = "jdbc:postgresql://localhost:5432/$database?user=$user&password=$password"
     return try {
         Class.forName("org.postgresql.Driver")
         DriverManager.getConnection(url)
@@ -54,15 +54,15 @@ internal fun Project.stopOtherProjects(composeProjectName: String) {
     }
 }
 
-internal fun Project.startLocalInfra(testDbName: String, composeProjectName: String) {
+internal fun Project.startLocalInfra(testDbName: String, dbUser: String, dbPassword: String, composeProjectName: String) {
     println("using build namespace ${buildNamespace()}")
     stopOtherProjects(composeProjectName)
     when {
-        !testConnection(testDbName) -> {
+        !testConnection(testDbName, dbUser, dbPassword) -> {
             println("$testDbName db could not be reached, stopping current infra!")
             stopLocalInfra(composeProjectName)
         }
-        testConnection(testDbName) -> return
+        testConnection(testDbName, dbUser, dbPassword) -> return
     }
 
     println("Starting docker compose project: $composeProjectName")
@@ -72,7 +72,7 @@ internal fun Project.startLocalInfra(testDbName: String, composeProjectName: Str
         it.commandLine("docker", "compose", "up", "-d", "--remove-orphans")
         it.workingDir("${rootProject.projectDir}/src/$composeProjectName")
     }
-    waitOnLocalPostgres(testDbName)
+    waitOnLocalPostgres(testDbName, dbUser, dbPassword)
 }
 
 private fun getPostgreSQLHost(): String {
@@ -96,5 +96,16 @@ private fun getElasticSearchHost(): String {
 internal fun Project.stopLocalInfra(projectName: String) {
     exec {
         it.commandLine("docker", "compose", "-p", projectName, "down", "--remove-orphans")
+    }
+}
+
+internal fun Project.removeImages(images: List<String> = emptyList(), ignoreExitValue: Boolean = true) {
+    if (images.isNotEmpty()) {
+        exec {
+            println("Removing images: ${images.joinToString(" ")}")
+            it.commandLine("docker", "image", "rm")
+            it.args = it.args + images
+            it.isIgnoreExitValue = ignoreExitValue
+        }
     }
 }

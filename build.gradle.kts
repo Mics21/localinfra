@@ -32,15 +32,15 @@ gradlePlugin {
 }
 
 pluginBundle {
-    website = "https://github.com/mics21/localInfraPlugin"
-    vcsUrl = "https://github.com/mics21/localInfraPlugin"
+    website = "https://github.com/Mics21/localinfra"
+    vcsUrl = "https://github.com/Mics21/localinfra"
     description = "Local Infra Plugin to start the local infra of a project"
 
     (plugins) {
         "localInfraPlugin" {
             // id is captured from java-gradle-plugin configuration
             displayName = "Local Infra Plugin"
-            tags = mutableListOf("infrastructure")
+            tags = mutableListOf("infrastructure", "docker", "docker-compose")
         }
     }
 
