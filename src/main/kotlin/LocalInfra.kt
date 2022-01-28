@@ -54,7 +54,13 @@ internal fun Project.stopOtherProjects(composeProjectName: String) {
     }
 }
 
-internal fun Project.startLocalInfra(testDbName: String, dbUser: String, dbPassword: String, composeProjectName: String) {
+internal fun Project.startLocalInfra(
+    testDbName: String,
+    dbUser: String,
+    dbPassword: String,
+    composeProjectName: String,
+    hostNameMapping: Map<String, String>?
+) {
     println("using build namespace ${buildNamespace()}")
     stopOtherProjects(composeProjectName)
     when {
@@ -67,29 +73,21 @@ internal fun Project.startLocalInfra(testDbName: String, dbUser: String, dbPassw
 
     println("Starting docker compose project: $composeProjectName")
     exec {
-        it.environment("REMOTEHOST_POSTGRESQL", getPostgreSQLHost())
-        it.environment("REMOTEHOST_ELASTICSEARCH", getElasticSearchHost())
-        it.commandLine("docker", "compose", "up", "-d", "--remove-orphans")
+        hostNameMapping?.forEach { (key, value) ->
+            it.environment(key, getHostForNameMapping(key, value))
+        }
+            it.commandLine("docker", "compose", "up", "-d", "--remove-orphans")
         it.workingDir("${rootProject.projectDir}/src/$composeProjectName")
     }
     waitOnLocalPostgres(testDbName, dbUser, dbPassword)
 }
 
-private fun getPostgreSQLHost(): String {
+private fun getHostForNameMapping(envName: String, serviceName: String): String {
     return DefaultKubernetesClient().run {
-        services().inNamespace(buildNamespace()).withName("database-cloud-infra")
+        services().inNamespace(buildNamespace()).withName(serviceName)
             .get().status.loadBalancer.ingress.first().hostname
     }.also {
-        println("using database: $it")
-    }
-}
-
-private fun getElasticSearchHost(): String {
-    return DefaultKubernetesClient().run {
-        services().inNamespace(buildNamespace()).withName("elasticsearch-cloud-infra")
-            .get().status.loadBalancer.ingress.first().hostname
-    }.also {
-        println("using elasticsearch: $it")
+        println("using $envName: $it")
     }
 }
 

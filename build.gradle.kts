@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.mics21"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     gradlePluginPortal()
@@ -47,6 +47,6 @@ pluginBundle {
     mavenCoordinates {
         groupId = "io.github.mics21"
         artifactId = "local-infra-plugin"
-        version = "1.0.0"
+        version = "1.0.1"
     }
 }

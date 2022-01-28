@@ -5,4 +5,5 @@ open class LocalInfraPluginExtension {
     var testDatabaseName: String = ""
     var dbUser: String = "postgres"
     var dbPassword: String = "postgres"
+    var hostNameMapping: Map<String, String>? = null
 }

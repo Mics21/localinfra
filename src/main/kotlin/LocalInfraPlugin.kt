@@ -30,7 +30,8 @@ class LocalInfraPlugin : Plugin<Project> {
                     extension.testDatabaseName,
                     extension.dbUser,
                     extension.dbPassword,
-                    extension.dockerComposeProjectName
+                    extension.dockerComposeProjectName,
+                    extension.hostNameMapping
                 )
             }
         }
@@ -44,7 +45,8 @@ class LocalInfraPlugin : Plugin<Project> {
                     extension.testDatabaseName,
                     extension.dbUser,
                     extension.dbPassword,
-                    extension.dockerComposeProjectName
+                    extension.dockerComposeProjectName,
+                    extension.hostNameMapping
                 )
             }
         }
