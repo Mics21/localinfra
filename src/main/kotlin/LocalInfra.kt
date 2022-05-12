@@ -92,6 +92,9 @@ private fun getHostForNameMapping(envName: String, serviceName: String): String 
 }
 
 internal fun Project.stopLocalInfra(projectName: String) {
+    if (currentRunningComposeProject() == null) {
+        return
+    }
     exec {
         it.commandLine("docker", "compose", "-p", projectName, "down", "--remove-orphans")
     }
