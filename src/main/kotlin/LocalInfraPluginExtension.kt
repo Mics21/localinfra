@@ -6,4 +6,5 @@ open class LocalInfraPluginExtension {
     var dbUser: String = "postgres"
     var dbPassword: String = "postgres"
     var hostNameMapping: Map<String, String>? = null
+    var kubeconfig: String? = null
 }
