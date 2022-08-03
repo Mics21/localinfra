@@ -1,5 +1,6 @@
 package io.github.mics21.localInfraPlugin
 
+import io.fabric8.kubernetes.client.Config
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import org.gradle.api.Project
 import java.io.File
@@ -59,7 +60,8 @@ internal fun Project.startLocalInfra(
     dbUser: String,
     dbPassword: String,
     composeProjectName: String,
-    hostNameMapping: Map<String, String>?
+    hostNameMapping: Map<String, String>?,
+    kubeconfigPath:String?
 ) {
     println("using build namespace ${buildNamespace()}")
     stopOtherProjects(composeProjectName)
@@ -74,7 +76,7 @@ internal fun Project.startLocalInfra(
     println("Starting docker compose project: $composeProjectName")
     exec {
         hostNameMapping?.forEach { (key, value) ->
-            it.environment(key, getHostForNameMapping(key, value))
+            it.environment(key, getHostForNameMapping(key, value,kubeconfigPath))
         }
             it.commandLine("docker", "compose", "up", "-d", "--remove-orphans")
         it.workingDir("${rootProject.projectDir}/src/$composeProjectName")
@@ -82,14 +84,17 @@ internal fun Project.startLocalInfra(
     waitOnLocalPostgres(testDbName, dbUser, dbPassword)
 }
 
-private fun getHostForNameMapping(envName: String, serviceName: String): String {
-    return DefaultKubernetesClient().run {
+private fun getHostForNameMapping(envName: String, serviceName: String,kubeconfigPath:String?): String {
+    return kubeClient(kubeconfigPath).run {
         services().inNamespace(buildNamespace()).withName(serviceName)
             .get().status.loadBalancer.ingress.first().hostname
     }.also {
         println("using $envName: $it")
     }
 }
+private fun kubeClient(kubeconfigPath: String?)=kubeconfigPath?.let {
+    DefaultKubernetesClient(Config.fromKubeconfig(File(it).readText()))
+}?:DefaultKubernetesClient()
 
 internal fun Project.stopLocalInfra(projectName: String) {
     if (currentRunningComposeProject() == null) {

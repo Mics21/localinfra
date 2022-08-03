@@ -33,6 +33,7 @@ localInfra {
 | dbUser                   | postgres      | db user for connection check                                                                             |
 | dbPassword               | postgres      | db password for connection check                                                                         |
 | hostNameMapping          |               | (optional) mapping from envName used in docker-compose file to service name from cluster to get host url |
+| kubeconfig               |               | (optional) the kubeconfig file to use eg: `System.getProperty("user.home") + "/.kube/config-my"`         |
 
 ## Registered Tasks
 
