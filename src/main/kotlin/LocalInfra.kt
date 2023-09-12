@@ -1,7 +1,7 @@
 package io.github.mics21.localInfraPlugin
 
 import io.fabric8.kubernetes.client.Config
-import io.fabric8.kubernetes.client.DefaultKubernetesClient
+import io.fabric8.kubernetes.client.KubernetesClientBuilder
 import org.gradle.api.Project
 import java.io.File
 import java.sql.DriverManager
@@ -93,8 +93,8 @@ private fun getHostForNameMapping(envName: String, serviceName: String,kubeconfi
     }
 }
 private fun kubeClient(kubeconfigPath: String?)=kubeconfigPath?.let {
-    DefaultKubernetesClient(Config.fromKubeconfig(File(it).readText()))
-}?:DefaultKubernetesClient()
+    KubernetesClientBuilder().withConfig(Config.fromKubeconfig(File(it).readText())).build()
+}?:KubernetesClientBuilder().build()
 
 internal fun Project.stopLocalInfra(projectName: String) {
     if (currentRunningComposeProject() == null) {
