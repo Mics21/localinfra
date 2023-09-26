@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.mics21"
-version = "1.0.4"
+version = "1.0.5"
 
 repositories {
     gradlePluginPortal()
@@ -19,7 +19,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21")
 
-    implementation("io.fabric8:kubernetes-client:6.0.0")
+    implementation("io.fabric8:kubernetes-client:6.8.1")
 
 }
 
@@ -48,6 +48,6 @@ pluginBundle {
     mavenCoordinates {
         groupId = "io.github.mics21"
         artifactId = "local-infra-plugin"
-        version = "1.0.4"
+        version = "1.0.5"
     }
 }
